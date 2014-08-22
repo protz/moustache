@@ -1,14 +1,15 @@
 type typ =
-  | Arrow of typ * typ
-  | Unit
+  | TArrow of typ * typ
+  | TUnit
 
 type expr =
-  | Lambda of string * expr
-  | App of expr * expr
-  | Unit
+  | ELambda of string * expr
+  | EApp of expr * expr
+  | EUnit
+  | EVar of string
 
 let is_arrow = function
-  | Arrow _ -> true
+  | TArrow _ -> true
   | _ -> false
 
 let equal = (=)

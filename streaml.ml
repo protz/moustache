@@ -163,3 +163,11 @@ let rec combine (f: 'a -> 'b -> 'c) (l1: 'a t) (l2: 'b t): 'c t =
   | Nil ->
       nil
   end
+
+let rec of_list (l: 'a list): 'a t =
+  lazy begin match l with
+  | hd :: tl ->
+      Cons (hd, of_list tl)
+  | [] ->
+      Nil
+  end
