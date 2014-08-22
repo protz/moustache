@@ -1,0 +1,2 @@
+not (<corelib/*> or <stdlib/*>): debug, \
+  annot, bin_annot, strict_sequence, my_warnings
