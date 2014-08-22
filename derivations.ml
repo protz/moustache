@@ -1,6 +1,14 @@
 open Types
+open Expressions
 
 (* An older version, commented out *)
+
+(* We have three possible constructors for expressions, meaning that for each
+ * one of them, we have a corresponding typing rule. *)
+(* type rule = *)
+(*   | Lambda *)
+(*   | App *)
+(*   | Unit *)
 
 (* type successful_derivation = *)
 (*   | Success of rule * (successful_derivation list * typ) stream *)
@@ -16,15 +24,7 @@ open Types
 
 (* -------------------------------------------------------------------------- *)
 
-
 (* Simplified version of the earlier discussion *)
-
-(* We have three possible constructors for expressions, meaning that for each
- * one of them, we have a corresponding typing rule. *)
-(* type rule = *)
-(*   | Lambda *)
-(*   | App *)
-(*   | Unit *)
 
 (* An expression that we successfully type-checked yields a stream of possible
  * types for it. *)
@@ -36,22 +36,31 @@ type successful_derivation =
 type outcome =
   successful_derivation option
 
-module StringMap = Map.Make(struct
-  type t = string
-  let compare = compare
-end)
+(* Basic handling of environments. We map each variable (that is, a string) to a
+ * stream of possible types for it. *)
+module Env = struct
 
-type env = successful_derivation StringMap.t
+  module StringMap = Map.Make(struct
+    type t = string
+    let compare = compare
+  end)
 
-let empty: env =
-  StringMap.empty
+  type env = {
+    env: outcome StringMap.t
+  }
 
-let add env x sd =
-  StringMap.add x sd env
+  let empty: env =
+    { env = StringMap.empty }
 
-let find env x =
-  StringMap.find x env
+  let add { env } x sd =
+    { env = StringMap.add x sd env }
 
+  let find { env } x =
+    StringMap.find x env
+
+end
+
+(* This type-checks an application [e1 e2]. *)
 let rec check_app env (e1: expr) (e2: expr): outcome =
   match check_expr env e1 with
   | None ->
@@ -82,20 +91,19 @@ let rec check_app env (e1: expr) (e2: expr): outcome =
       sd
 
 and check_lambda env (x: string) (body: expr): outcome =
-  (* We're dumb: we only try two possible types for [x] *)
-  let sd1 = Streaml.of_list [TUnit; TArrow (TUnit, TUnit)] in
-  let env = add env x sd1 in
+  (* We're dumb: we only try two possible types for [x]. Note: this is the only
+   * place where a new variable is bound. *)
+  let sd1 = Some (Streaml.of_list [TUnit; TArrow (TUnit, TUnit)]) in
+  let env = Env.add env x sd1 in
   check_expr env body
 
 and check_unit: outcome =
   Some (Streaml.of_list [TUnit])
 
 and check_var env x =
-  let sd = find env x in
-  assert ((Streaml.next sd) <> Streaml.Nil);
-  Some sd
+  Env.find env x
 
-and check_expr (env: env) (expr: expr): outcome =
+and check_expr (env: Env.env) (expr: expr): outcome =
   match expr with
   | EApp (e1, e2) ->
       check_app env e1 e2
