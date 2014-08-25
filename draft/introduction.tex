@@ -48,5 +48,7 @@ we had to compromise on the following:
   \item the type-checker needs to backtrack; therefore, we deal with a stream
     (lazy list) of solution for each expression rather than one possible type,
     or zero type if the expression failed to be type-checked;
-  \item error reporting also becomes harder; 
-\end{itemize}<++>
+  \item error reporting also becomes harder; right now, the derivation library
+    we built constructs derivations or presents the caller with an explanation
+    for the failure.
+\end{itemize}
