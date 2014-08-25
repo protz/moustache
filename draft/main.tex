@@ -7,6 +7,9 @@
 \usepackage{xspace}
 \usepackage{microtype}
 \usepackage{paralist}
+\usepackage{tabularx}
+  \newcolumntype{R}{>{\raggedleft\arraybackslash}X}%
+  \newcolumntype{Y}{>{\centering\arraybackslash}X}%
 
 
 \newcommand{\code}[1]{\texttt{#1}}
@@ -30,7 +33,7 @@
 \copyrightdata{978-1-nnnn-nnnn-n/yy/mm}
 \doi{nnnnnnn.nnnnnnn}
 
-\title{The dumbest type-checker ever}
+\title{Check out this one weird trick to make your type-checker look better}
 
 \authorinfo{
   Pierre-Évariste Dagand \quad
@@ -48,21 +51,18 @@
 \maketitle
 
 \begin{abstract}
-  In spite of recent advances in program certification, testing remains a
-  widely-used component of the software development cycle. Various flavors of
-  testing exist: popular ones include \emph{unit testing}, which consists in
-  manually crafting test cases for specific parts of the code base, as well as
-  \emph{quickcheck-style} testing, where instances of a type are automatically
-  generated to serve as test inputs.
+  The Mezzo programming language features an unusual type-checking discipline,
+  in which several permissions may be available for the same variable. This
+  means the type-checker must consider several possible types for one
+  single variable. This precludes unification-based type-checking, and instead
+  led us into implementing a backtracking procedure that performs forward
+  type-checking.
 
-  These classical methods of testing can be thought of as \emph{internal}
-  testing: the test routines access the internal representation of the data
-  structures to be checked. We propose a new method of \emph{external}
-  testing where the library only deals with a \emph{module interface}. The data
-  structures are exported as \emph{abstract types}; the testing framework
-  behaves like regular client code and combines functions exported by the
-  module to build new elements of the various abstract types. Any counter-examples
-  are then presented to the user.
+  The present paper extracts the essence of our derivations library. Thanks to a
+  combination of monads, lazy streams and syntactic tricks, not only does the
+  core of our type-checker look very close to the formal presentation of
+  type-checking, but it also automatically builds a derivation, hence allowing
+  the implementors to examine a successful or failed derivation.
 \end{abstract}
 
 \category{D.2.5}{Software Engineering}{Testing and Debugging}
@@ -73,13 +73,7 @@ testing,
 quickcheck
 }
 
-% \input{introduction}
-% \input{anexample}
-% \input{representing}
-% \input{properties}
-% \input{examples}
-% \input{relatedwork}
-% \input{conclusion}
+\input{introduction}
 
 \bibliographystyle{plain}
 \hbadness=10000

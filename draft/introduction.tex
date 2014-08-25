@@ -1,0 +1,52 @@
+\section{Introduction}
+
+We consider the simplest possible language.
+
+\begin{figure}[h]
+  \begin{tabularx}{\columnwidth}{rlR}
+    $t ::=$ & & type \\
+            & $t \to t$       & arrow \\
+            & $()$            & unit \\
+      \\[1ex]
+    $e ::=$ & & expression \\
+            & $e \ e$         & application \\
+            & $\lambda x.e $  & abstraction \\
+            & $x$             & variable \\
+            & $()$            & unit \\
+  \end{tabularx}
+  \caption{DumbML, the degenerated language we're considering}
+  \label{fig:syntax}
+\end{figure}
+
+This leads to the following OCaml definitions:
+
+\begin{ocamlcode}
+type typ =
+  | TArrow of typ * typ
+  | TUnit
+
+type expr =
+  | ELambda of string * expr
+  | EApp of expr * expr
+  | EUnit
+  | EVar of string
+\end{ocamlcode}
+
+Not only do we take an excessively simple language, but we also take an
+excessively stupid algorithm which, instead of using a notion of polymorphism,
+rather, tries several solutions. That is, when type-checking $x$, instead of
+using a unification variable and generalizing (ML) or considering one possible
+type (simply-typed lambda-calculus), we are going to try several possible types
+for $x$, one after another, and see which of these types ``work''.
+
+The reason why are taking such a surprising approach is that, as we mentioned
+earlier, in Mezzo, we cannot take a classic, unification-based approach. Mezzo
+is at the frontier between a program logic and a type system; therefore, the
+usual approaches that we use when writing a type-checker no longer work. Namely,
+we had to compromise on the following:
+\begin{itemize}
+  \item the type-checker needs to backtrack; therefore, we deal with a stream
+    (lazy list) of solution for each expression rather than one possible type,
+    or zero type if the expression failed to be type-checked;
+  \item error reporting also becomes harder; 
+\end{itemize}<++>

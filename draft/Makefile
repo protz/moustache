@@ -1,7 +1,7 @@
 .PHONY: all
 
 all:
-	latexmk -pvc -pdflatex main.tex
+	latexmk -pvc -pdf main.tex
 
 clean:
 	latexmk -c
