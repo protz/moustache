@@ -9,3 +9,6 @@ clean:
 
 test: all
 	./test.byte
+
+export:
+	git archive --format tar --prefix streaml/ HEAD | bzip2 -9 > ../streaml.tar.bz2

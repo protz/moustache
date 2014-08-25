@@ -62,16 +62,12 @@ end
 
 (* This type-checks an application [e1 e2]. *)
 let rec check_app env (e1: expr) (e2: expr): outcome =
-  match check_expr env e1 with
-  | None ->
-      (* First premise failed *)
+  match check_expr env e1, check_expr env e2 with with
+  | None, _
+  | _, None ->
+      (* First or second premise failed *)
       None
-  | Some sd1 ->
-  match check_expr env e2 with
-  | None ->
-      (* Second premise failed *)
-      None
-  | Some sd2 ->
+  | Some sd1, Some sd2 ->
       (* Only keep arrows *)
       let sd1 = Streaml.filter is_arrow sd1 in
       (* The function application only works if the type of the arrow domain
