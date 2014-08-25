@@ -1,0 +1,107 @@
+\section{The no-frills version}
+
+First, we explain how a streaming type-checker works.
+
+\begin{ocamlcode}
+type successful_derivation =
+  typ MyStream.t (* Invariant: non-empty stream! *)
+
+type outcome =
+  successful_derivation option
+\end{ocamlcode}
+
+A succesful derivation yields a series of types for a given expression. In order
+to make things efficient, this is represented using a stream, that is, a lazy
+list. The outcome of type-checking an expression is thus either a successful
+derivation, or nothing. At this stage, no actual derivation is being built, and
+the function just return list of types. Later on, we will build actual
+derivations.
+
+The main function for type-checking an expression hence no longer returns a
+\code{typ} (or a \code{typ option}), but rather now returns a \code{result}.
+
+\begin{ocamlcode}
+let rec check_expr (env: Env.env) (expr: expr): outcome =
+  match expr with
+  | EApp (e1, e2) ->
+      check_app env e1 e2
+  | ELambda (x, e) ->
+      check_lambda env x e
+  | EUnit ->
+      check_unit
+  | EVar x ->
+      check_var env x
+\end{ocamlcode}
+
+Similarly, the environment no longer maps variables to ``their type'', but to
+\code{outcome}'s.
+
+\begin{ocamlcode}
+module Env = struct
+
+  type env = {
+    env: outcome StringMap.t
+  }
+
+end
+\end{ocamlcode}
+
+Our type-checker is dumb: whenever a new variable is introduced in scope, it
+will attempt to type-check the remainder of the scope with various possible
+types for the variable.
+
+\begin{ocamlcode}
+let base_types =
+  Some (MyStream.of_list [TUnit; TArrow (TUnit, TUnit)])
+\end{ocamlcode}
+
+For instance, when type-checking an abstraction:
+
+\begin{ocamlcode}
+and check_lambda env (x: string) (body: expr): outcome =
+  let sd1 = base_types in
+  let env = Env.add env x sd1 in
+  check_expr env body
+\end{ocamlcode}
+
+The set of base types that is explored for the variable \code{x} is arbitrary:
+we could try, beyond $()$ and $() \to ()$, several other types. This determines
+the fragment of the solution space that we wish to explore.
+
+This means that, when type-checking $\lambda x. x$, we will yield as many types
+as there are in \code{base\_types}.
+
+The interesting case is that of the application $f\ x$: we take all possible
+types for $f$, all possible types for $x$, and must keep only those that
+allow for the typing derivation to succeed.
+
+\begin{ocamlcode}
+and check_app env (e1: expr) (e2: expr): outcome =
+  match check_expr env e1, check_expr env e2 with with
+  | None, _
+  | _, None ->
+      None
+  | Some sd1, Some sd2 ->
+      let sd1 = MyStream.filter is_arrow sd1 in
+      let apply t1 t2 =
+        match t1, t2 with
+        | TArrow (u, v), u' when equal u u' -> Some v
+        | _ -> None
+      in
+      let sd = MyStream.combine apply sd1 sd2 in
+      let sd = MyStream.lift_option sd in
+      sd
+\end{ocamlcode}
+
+A first reason for failure is if the derivation for either $f$ or $x$ fails; in
+that case, this is an early exit and the application cannot be type-checked. If,
+however, no early failure occurs, we keep only arrows for $f$, then take all
+possible combinations of types for $f$ and $x$ respectively, and retain only
+those where the type for $f$ is $u \to v$ and the type for $x$ is $u$, meaning
+that the type in the conclusion is $v$.
+
+Finally, it may be the case that none of the combinations work, meaning that the
+resulting stream contains only \code{None}. The call to \code{lift\_option}
+maintains our invariant and makes sure that a stream of failures leads to
+\code{None}, while a stream with at least one successful derivation translates
+to \code{Some}.

@@ -60,6 +60,9 @@ module Env = struct
 
 end
 
+let base_types =
+  Some (Streaml.of_list [TUnit; TArrow (TUnit, TUnit)])
+
 (* This type-checks an application [e1 e2]. *)
 let rec check_app env (e1: expr) (e2: expr): outcome =
   match check_expr env e1, check_expr env e2 with with
@@ -89,7 +92,7 @@ let rec check_app env (e1: expr) (e2: expr): outcome =
 and check_lambda env (x: string) (body: expr): outcome =
   (* We're dumb: we only try two possible types for [x]. Note: this is the only
    * place where a new variable is bound. *)
-  let sd1 = Some (Streaml.of_list [TUnit; TArrow (TUnit, TUnit)]) in
+  let sd1 = base_types in
   let env = Env.add env x sd1 in
   check_expr env body
 
