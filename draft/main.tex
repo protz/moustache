@@ -1,0 +1,88 @@
+\documentclass[nonatbib]{sigplanconf}
+
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{minted}
+\usepackage{xspace}
+\usepackage{microtype}
+\usepackage{paralist}
+
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\sref}[1]{\S\ref{#1}}
+\newminted{ocaml}{fontsize=\footnotesize}
+\newminted{haskell}{fontsize=\footnotesize}
+
+\begin{document}
+
+% For ACM, explicitly specify A4 paper.
+% For us, no need to specify it (but check your TeX configuration if
+% you insist on producing a specific size).
+\special{papersize=8.5in,11in}
+\setlength{\pdfpageheight}{\paperheight}
+\setlength{\pdfpagewidth}{\paperwidth}
+
+\exclusivelicense
+
+\conferenceinfo{ICFP~'14}{September 1--3, 2014, Copenhagen, Denmark}
+\copyrightyear{2014}
+\copyrightdata{978-1-nnnn-nnnn-n/yy/mm}
+\doi{nnnnnnn.nnnnnnn}
+
+\title{The dumbest type-checker ever}
+
+\authorinfo{
+  Pierre-Évariste Dagand \quad
+  Jonathan Protzenko
+}{
+  INRIA
+}{http://gallium.inria.fr/blog/}
+% \authorinfo{Pierre-Évariste Dagand}
+%            {INRIA}
+%            {pierre-evariste.dagand@inria.fr}
+% \authorinfo{Jonathan Protzenko}
+%            {INRIA}
+%            {jonathan.protzenko@ens-lyon.org}
+
+\maketitle
+
+\begin{abstract}
+  In spite of recent advances in program certification, testing remains a
+  widely-used component of the software development cycle. Various flavors of
+  testing exist: popular ones include \emph{unit testing}, which consists in
+  manually crafting test cases for specific parts of the code base, as well as
+  \emph{quickcheck-style} testing, where instances of a type are automatically
+  generated to serve as test inputs.
+
+  These classical methods of testing can be thought of as \emph{internal}
+  testing: the test routines access the internal representation of the data
+  structures to be checked. We propose a new method of \emph{external}
+  testing where the library only deals with a \emph{module interface}. The data
+  structures are exported as \emph{abstract types}; the testing framework
+  behaves like regular client code and combines functions exported by the
+  module to build new elements of the various abstract types. Any counter-examples
+  are then presented to the user.
+\end{abstract}
+
+\category{D.2.5}{Software Engineering}{Testing and Debugging}
+
+\keywords{
+functional programming,
+testing,
+quickcheck
+}
+
+% \input{introduction}
+% \input{anexample}
+% \input{representing}
+% \input{properties}
+% \input{examples}
+% \input{relatedwork}
+% \input{conclusion}
+
+\bibliographystyle{plain}
+\hbadness=10000
+\bibliography{local}
+
+\end{document}
